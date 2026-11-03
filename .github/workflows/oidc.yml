@@ -4,7 +4,20 @@ permissions:
   id-token: write
   contents: read
 jobs:
-  probe:
+  probe-test-acct:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assume test OIDC role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::605921512955:role/Github-Actions-OIDC
+          aws-region: us-east-1
+          role-session-name: gho-oidc-probe
+      - name: Who am I
+        run: aws sts get-caller-identity
+      - name: List S3 buckets
+        run: aws s3api list-buckets --no-cli-pager || true
+  probe-prod-acct:
     runs-on: ubuntu-latest
     steps:
       - name: Assume prod OIDC role
@@ -15,15 +28,5 @@ jobs:
           role-session-name: gho-oidc-probe
       - name: Who am I
         run: aws sts get-caller-identity
-      - name: List S3 buckets (prod)
-        run: aws s3api list-buckets --no-cli-pager || true
-      - name: Assume test OIDC role
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::605921512955:role/Github-Actions-OIDC
-          aws-region: us-east-1
-          role-session-name: gho-oidc-probe
-      - name: Who am I (test)
-        run: aws sts get-caller-identity
-      - name: List S3 buckets (test)
+      - name: List S3 buckets
         run: aws s3api list-buckets --no-cli-pager || true
